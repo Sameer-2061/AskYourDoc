@@ -36,7 +36,7 @@ chats_collection = db['chats']
 # 4. HELPER FUNCTIONS FOR GEMINI EMBEDDINGS (No heavy packages needed!)
 def get_embedding(text: str) -> list[float]:
     result = genai.embed_content(
-        model="models/embedding-001", 
+        model="models/gemini-embedding-001",  # <-- Yahan 'gemini-' add kiya hai
         content=text
     )
     return result['embedding']
