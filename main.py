@@ -33,7 +33,7 @@ db = client['Final_AI_DB']
 files_collection = db['files']
 chats_collection = db['chats']
 
-# 4. HELPER FUNCTIONS FOR GEMINI EMBEDDINGS (No heavy packages needed!)
+# 4. HELPER FUNCTIONS FOR GEMINI EMBEDDINGS (No heavy packages needed!)s
 def get_embedding(text: str) -> list[float]:
     result = genai.embed_content(
         model="models/gemini-embedding-001",  # <-- Yahan 'gemini-' add kiya hai
