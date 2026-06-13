@@ -784,7 +784,8 @@
             appendMessage("Processing documents...", "System");
 
             try {
-                const response = await fetch("http://127.0.0.1:8000/upload/", {
+                // UPDATE 1: Yahan local URL ki jagah Render wala URL daala gaya hai
+                const response = await fetch("https://askyourdoc-api.onrender.com/upload/", {
                     method: "POST",
                     body: formData
                 });
@@ -804,7 +805,8 @@
             questionInput.value = ""; 
 
             try {
-                const response = await fetch("http://127.0.0.1:8000/ask/", {
+                // UPDATE 2: Yahan bhi local URL ki jagah Render wala URL daala gaya hai
+                const response = await fetch("https://askyourdoc-api.onrender.com/ask/", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
