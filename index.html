@@ -1,0 +1,832 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus AI | Professional</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --bg-main: #09090b;       
+            --bg-panel: #18181b;      
+            --border-color: #27272a;  
+            --text-main: #f4f4f5;
+            --text-muted: #a1a1aa;
+            --user-bubble: #2563eb;   
+            --bot-bubble: #27272a;    
+            --status-green: #10b981;  
+            --nexus-gradient: linear-gradient(135deg, #8b5cf6, #0ea5e9); 
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #09090b;
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 900px;
+            height: 92vh;
+            background-color: var(--bg-panel);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 20px 28px;
+            background-color: var(--bg-panel);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h2 {
+            font-size: 1.3rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background-color: var(--status-green);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--status-green);
+        }
+
+        .upload-section {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        input[type="file"] { display: none; }
+
+        .custom-file-upload {
+            border: 1px solid var(--border-color);
+            padding: 9px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+        }
+
+        .custom-file-upload:hover {
+            border-color: #52525b;
+            color: var(--text-main);
+        }
+
+        .upload-btn {
+            background: var(--nexus-gradient);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: transform 0.2s;
+        }
+
+        /* Chat Area */
+        .chat-area {
+            flex: 1;
+            padding: 28px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            scroll-behavior: smooth;
+        }
+        .chat-area::-webkit-scrollbar { width: 6px; }
+        .chat-area::-webkit-scrollbar-track { background: var(--bg-panel); }
+        .chat-area::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 10px; }
+
+        .message {
+            max-width: 80%;
+            padding: 14px 18px;
+            border-radius: 16px;
+            line-height: 1.6;
+            font-size: 0.95rem;
+            word-wrap: break-word;
+        }
+
+        .system-message {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            align-self: center;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 6px 14px;
+        }
+
+        .user-message {
+            background-color: var(--user-bubble);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .bot-message {
+            background-color: var(--bot-bubble);
+            color: var(--text-main);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+
+        .bot-message p { margin-bottom: 10px; }
+        .bot-message pre { 
+            background-color: #09090b; 
+            padding: 12px; 
+            border-radius: 8px; 
+            overflow-x: auto; 
+            border: 1px solid var(--border-color);
+        }
+
+        /* Toggle Switch Styling */
+        .controls-area {
+            padding: 10px 28px;
+            background-color: #121214;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .mode-label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            transition: color 0.3s;
+        }
+
+        .mode-active {
+            color: #38bdf8; /* Highlight color when active */
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 46px;
+            height: 24px;
+        }
+
+        .switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--border-color);
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background: var(--nexus-gradient);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(22px);
+        }
+
+        /* Input Area */
+        .input-area {
+            padding: 15px 28px 25px 28px;
+            background-color: #121214;
+            display: flex;
+            gap: 14px;
+        }
+
+        .input-area input[type="text"] {
+            flex: 1;
+            padding: 14px 22px;
+            border-radius: 24px;
+            border: 1px solid var(--border-color);
+            background-color: #09090b;
+            color: var(--text-main);
+            outline: none;
+        }
+
+        .input-area input[type="text"]:focus {
+            border-color: #3b82f6;
+        }
+
+        .send-btn {
+            background-color: white;
+            color: #09090b;
+            border: none;
+            border-radius: 24px;
+            padding: 0 26px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chat-container">
+        <div class="header">
+            <h2><span class="status-dot"></span> Nexus AI </h2>
+            <div class="upload-section">
+                <label for="fileInput" class="custom-file-upload" id="fileLabel">
+                    Choose File
+                </label>
+                <input type="file" id="fileInput" multiple onchange="updateFileName()">
+                <button class="upload-btn" onclick="uploadFiles()">Upload</button>
+            </div>
+        </div>
+
+        <div class="chat-area" id="chatArea">
+            <div class="message system-message">Welcome! Switch modes below to ask from Docs or ask Globally.</div>
+        </div>
+
+        <div class="controls-area">
+            <span id="labelDoc" class="mode-label mode-active">Document Mode</span>
+            <label class="switch">
+                <input type="checkbox" id="aiModeToggle" onchange="toggleMode()">
+                <span class="slider"></span>
+            </label>
+            <span id="labelGlobal" class="mode-label">Global AI Mode</span>
+        </div>
+
+        <div class="input-area">
+            <input type="text" id="questionInput" placeholder="Ask anything..." onkeypress="handleKeyPress(event)">
+            <button class="send-btn" onclick="askQuestion()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        // Toggle Logic Function
+        let currentMode = "document";
+
+        function toggleMode() {
+            const toggle = document.getElementById("aiModeToggle");
+            const labelDoc = document.getElementById("labelDoc");
+            const labelGlobal = document.getElementById("labelGlobal");
+
+            if (toggle.checked) {
+                currentMode = "global";
+                labelDoc.classList.remove("mode-active");
+                labelGlobal.classList.add("mode-active");
+                document.getElementById("questionInput").placeholder = "Ask general questions to Global AI...";
+            } else {
+                currentMode = "document";
+                labelGlobal.classList.remove("mode-active");
+                labelDoc.classList.add("mode-active");
+                document.getElementById("questionInput").placeholder = "Ask questions about your uploaded Docs...";
+            }
+        }
+
+        function updateFileName() {
+            const input = document.getElementById('fileInput');
+            const label = document.getElementById('fileLabel');
+            if (input.files && input.files.length > 0) {
+                label.innerText = input.files.length === 1 ? input.files[0].name : input.files.length + ' files selected';
+            } else {
+                label.innerText = 'Choose File';
+            }
+        }
+
+        function appendMessage(text, sender) {
+            const chatArea = document.getElementById("chatArea");
+            const msgDiv = document.createElement("div");
+            
+            if (sender === "You") {
+                msgDiv.className = "message user-message";
+                msgDiv.innerText = text; 
+            } else if (sender === "System") {
+                msgDiv.className = "message system-message";
+                msgDiv.innerText = text;
+            } else {
+                msgDiv.className = "message bot-message";
+                msgDiv.innerHTML = marked.parse(text); 
+            }
+            
+            chatArea.appendChild(msgDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        async function uploadFiles() {
+            const fileInput = document.getElementById("fileInput");
+            if (fileInput.files.length === 0) {
+                appendMessage("Please select files first.", "System");
+                return;
+            }
+
+            const formData = new FormData();
+            for (let i = 0; i < fileInput.files.length; i++) {
+                formData.append("files", fileInput.files[i]);
+            }
+
+            appendMessage("Processing documents...", "System");
+
+            try {
+                const response = await fetch("http://127.0.0.1:8000/upload/", {
+                    method: "POST",
+                    body: formData
+                });
+                const result = await response.json();
+                appendMessage(result.message, "System");
+            } catch (error) {
+                appendMessage("Connection error. Is the backend server running?", "System");
+            }
+        }
+
+        async function askQuestion() {
+            const questionInput = document.getElementById("questionInput");
+            const question = questionInput.value.trim();
+            if (!question) return;
+
+            appendMessage(question, "You");
+            questionInput.value = ""; 
+
+            try {
+                const response = await fetch("http://127.0.0.1:8000/ask/", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        chat_id: "user123",
+                        question: question,
+                        top_k: 3,
+                        mode: currentMode // Sending the mode to backend!
+                    })
+                });
+                
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                
+                const result = await response.json();
+                appendMessage(result.answer, "Bot");
+            } catch (error) {
+                appendMessage("Failed to reach the AI engine. Please wait 5 seconds before asking again.", "System");
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === "Enter") askQuestion();
+        }
+    </script>
+</body>
+</html> -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AskYourDoc | Buddy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            /* Gemini Pro Vibe Colors */
+            --bg-main: #000000;       /* Pitch Black Background */
+            --bg-panel: #0a0a0f;      /* Very Deep Dark Blue/Black for inner panel */
+            --border-color: rgba(255, 255, 255, 0.08);  
+            --text-main: #f4f4f5;
+            --text-muted: #a1a1aa;
+            --user-bubble: #173b8a;   /* Deep Blue */
+            --bot-bubble: #121217;    /* Slightly lighter than panel */
+            --status-green: #10b981;  
+            /* The Magic Gradient matching the Gemini Spark */
+            --nexus-gradient: linear-gradient(135deg, #4285f4, #9b72cb, #d96570); 
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            /* Subtle bottom glow like the reference image */
+            background-image: radial-gradient(circle at 50% 100%, rgba(66, 133, 244, 0.15) 0%, rgba(0,0,0,0) 50%);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* The Magic Container */
+        .chat-container {
+            width: 96vw;  /* Almost full screen width */
+            max-width: 1400px; /* Wide enough for desktops */
+            height: 96vh; /* Almost full height */
+            
+            /* Gradient Border Trick */
+            background: linear-gradient(var(--bg-panel), var(--bg-panel)) padding-box,
+                        var(--nexus-gradient) border-box;
+            border: 2px solid transparent;
+            border-radius: 24px;
+            
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 20px 30px;
+            background-color: transparent;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h2 {
+            font-size: 1.4rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background-color: var(--status-green);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--status-green);
+        }
+
+        .upload-section {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        input[type="file"] { display: none; }
+
+        .custom-file-upload {
+            border: 1px solid var(--border-color);
+            padding: 10px 18px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+        }
+
+        .custom-file-upload:hover {
+            border-color: #52525b;
+            color: var(--text-main);
+        }
+
+        .upload-btn {
+            background: var(--nexus-gradient);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: transform 0.2s;
+        }
+        
+        .upload-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Chat Area */
+        .chat-area {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            scroll-behavior: smooth;
+        }
+        .chat-area::-webkit-scrollbar { width: 6px; }
+        .chat-area::-webkit-scrollbar-track { background: transparent; }
+        .chat-area::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+
+        .message {
+            max-width: 80%;
+            padding: 16px 20px;
+            border-radius: 16px;
+            line-height: 1.6;
+            font-size: 0.95rem;
+            word-wrap: break-word;
+        }
+
+        .system-message {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            align-self: center;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 8px 16px;
+            background-color: rgba(255,255,255,0.02);
+        }
+
+        .user-message {
+            background-color: var(--user-bubble);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 4px 15px rgba(23, 59, 138, 0.3);
+        }
+
+        .bot-message {
+            background-color: var(--bot-bubble);
+            color: var(--text-main);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+
+        .bot-message p { margin-bottom: 10px; }
+        .bot-message pre { 
+            background-color: #000; 
+            padding: 14px; 
+            border-radius: 8px; 
+            overflow-x: auto; 
+            border: 1px solid var(--border-color);
+        }
+
+        /* Toggle Switch Styling */
+        .controls-area {
+            padding: 12px 30px;
+            background-color: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .mode-label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            transition: color 0.3s;
+        }
+
+        .mode-active {
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255,255,255,0.3);
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 46px;
+            height: 24px;
+        }
+
+        .switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #333;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background: var(--nexus-gradient);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(22px);
+        }
+
+        /* Input Area */
+        .input-area {
+            padding: 15px 30px 25px 30px;
+            background-color: transparent;
+            display: flex;
+            gap: 14px;
+        }
+
+        .input-area input[type="text"] {
+            flex: 1;
+            padding: 16px 24px;
+            border-radius: 30px;
+            border: 1px solid var(--border-color);
+            background-color: rgba(255,255,255,0.03);
+            color: var(--text-main);
+            outline: none;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .input-area input[type="text"]:focus {
+            border-color: #9b72cb;
+            background-color: rgba(255,255,255,0.06);
+        }
+
+        .send-btn {
+            background-color: white;
+            color: #000;
+            border: none;
+            border-radius: 30px;
+            padding: 0 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .send-btn:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chat-container">
+        <div class="header">
+            <h2><span class="status-dot"></span> AskYourDoc </h2>
+            <div class="upload-section">
+                <label for="fileInput" class="custom-file-upload" id="fileLabel">
+                    Choose File
+                </label>
+                <input type="file" id="fileInput" multiple onchange="updateFileName()">
+                <button class="upload-btn" onclick="uploadFiles()">Upload</button>
+            </div>
+        </div>
+
+        <div class="chat-area" id="chatArea">
+            <div class="message system-message">Welcome! Switch modes below to ask from Docs or ask Globally.</div>
+        </div>
+
+        <div class="controls-area">
+            <span id="labelDoc" class="mode-label mode-active">Document Mode</span>
+            <label class="switch">
+                <input type="checkbox" id="aiModeToggle" onchange="toggleMode()">
+                <span class="slider"></span>
+            </label>
+            <span id="labelGlobal" class="mode-label">Global AI Mode</span>
+        </div>
+
+        <div class="input-area">
+            <input type="text" id="questionInput" placeholder="Ask anything..." onkeypress="handleKeyPress(event)">
+            <button class="send-btn" onclick="askQuestion()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        // Toggle Logic Function
+        let currentMode = "document";
+
+        function toggleMode() {
+            const toggle = document.getElementById("aiModeToggle");
+            const labelDoc = document.getElementById("labelDoc");
+            const labelGlobal = document.getElementById("labelGlobal");
+
+            if (toggle.checked) {
+                currentMode = "global";
+                labelDoc.classList.remove("mode-active");
+                labelGlobal.classList.add("mode-active");
+                document.getElementById("questionInput").placeholder = "Ask general questions to Global AI...";
+            } else {
+                currentMode = "document";
+                labelGlobal.classList.remove("mode-active");
+                labelDoc.classList.add("mode-active");
+                document.getElementById("questionInput").placeholder = "Ask questions about your uploaded Docs...";
+            }
+        }
+
+        function updateFileName() {
+            const input = document.getElementById('fileInput');
+            const label = document.getElementById('fileLabel');
+            if (input.files && input.files.length > 0) {
+                label.innerText = input.files.length === 1 ? input.files[0].name : input.files.length + ' files selected';
+            } else {
+                label.innerText = 'Choose File';
+            }
+        }
+
+        function appendMessage(text, sender) {
+            const chatArea = document.getElementById("chatArea");
+            const msgDiv = document.createElement("div");
+            
+            if (sender === "You") {
+                msgDiv.className = "message user-message";
+                msgDiv.innerText = text; 
+            } else if (sender === "System") {
+                msgDiv.className = "message system-message";
+                msgDiv.innerText = text;
+            } else {
+                msgDiv.className = "message bot-message";
+                msgDiv.innerHTML = marked.parse(text); 
+            }
+            
+            chatArea.appendChild(msgDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        async function uploadFiles() {
+            const fileInput = document.getElementById("fileInput");
+            if (fileInput.files.length === 0) {
+                appendMessage("Please select files first.", "System");
+                return;
+            }
+
+            const formData = new FormData();
+            for (let i = 0; i < fileInput.files.length; i++) {
+                formData.append("files", fileInput.files[i]);
+            }
+
+            appendMessage("Processing documents...", "System");
+
+            try {
+                const response = await fetch("http://127.0.0.1:8000/upload/", {
+                    method: "POST",
+                    body: formData
+                });
+                const result = await response.json();
+                appendMessage(result.message, "System");
+            } catch (error) {
+                appendMessage("Connection error. Is the backend server running?", "System");
+            }
+        }
+
+        async function askQuestion() {
+            const questionInput = document.getElementById("questionInput");
+            const question = questionInput.value.trim();
+            if (!question) return;
+
+            appendMessage(question, "You");
+            questionInput.value = ""; 
+
+            try {
+                const response = await fetch("http://127.0.0.1:8000/ask/", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        chat_id: "user123",
+                        question: question,
+                        top_k: 3,
+                        mode: currentMode 
+                    })
+                });
+                
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                
+                const result = await response.json();
+                appendMessage(result.answer, "Bot");
+            } catch (error) {
+                appendMessage("Failed to reach the AI engine. Please wait 5 seconds before asking again.", "System");
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === "Enter") askQuestion();
+        }
+    </script>
+</body>
+</html>

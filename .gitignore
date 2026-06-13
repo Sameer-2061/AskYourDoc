@@ -1,0 +1,14 @@
+# Environments
+ai_env/
+env/
+venv/
+
+# Security (NEVER UPLOAD)
+.env
+
+# Python Cache
+__pycache__/
+*.pyc
+
+# Temp Files
+temp_*.docx
