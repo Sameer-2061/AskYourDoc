@@ -6,9 +6,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import List
 from pydantic import BaseModel
 from pymongo import MongoClient
-from sentence_transformers import SentenceTransformer, util
 import google.generativeai as genai
 from dotenv import load_dotenv
+import math
 
 load_dotenv()
 
@@ -26,13 +26,28 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 3. SETUP MONGODB & EMBEDDINGS
+# 3. SETUP MONGODB
 mongo_uri = os.getenv("MONGO_URI")
 client = MongoClient(mongo_uri)
 db = client['Final_AI_DB'] 
 files_collection = db['files']
 chats_collection = db['chats']
-embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
+
+# 4. HELPER FUNCTIONS FOR GEMINI EMBEDDINGS (No heavy packages needed!)
+def get_embedding(text: str) -> list[float]:
+    result = genai.embed_content(
+        model="models/text-embedding-004",
+        content=text
+    )
+    return result['embedding']
+
+def cosine_similarity(vec1, vec2):
+    dot_product = sum(a * b for a, b in zip(vec1, vec2))
+    magnitude1 = math.sqrt(sum(a * a for a in vec1))
+    magnitude2 = math.sqrt(sum(b * b for b in vec2))
+    if magnitude1 == 0 or magnitude2 == 0:
+        return 0.0
+    return dot_product / (magnitude1 * magnitude2)
 
 def extract_text(file: UploadFile) -> str:
     ext = file.filename.lower().split('.')[-1]
@@ -54,11 +69,11 @@ def extract_text(file: UploadFile) -> str:
 async def upload_files(files: List[UploadFile] = File(...)):
     for file in files:
         text = extract_text(file)
-        embedding = embedding_model.encode(text, convert_to_tensor=True)
+        embedding = get_embedding(text)
         files_collection.insert_one({
             "filename": file.filename,
             "content": text,
-            "embedding": embedding.tolist()
+            "embedding": embedding
         })
     return {"message": "Files embedded and saved to MongoDB successfully!"}
 
@@ -68,9 +83,7 @@ class QuestionInput(BaseModel):
     top_k: int = 1
     mode: str = "document" 
 
-# Helper function to try multiple models (SDE Fallback Logic)
 def get_gemini_response(prompt: str) -> str:
-    # List of models from your terminal, ordered by preference
     models_to_try = [
         'gemini-2.5-flash',
         'gemini-2.0-flash',
@@ -88,13 +101,10 @@ def get_gemini_response(prompt: str) -> str:
             last_error = e
             continue
             
-    # If all models fail, raise the last error
     raise Exception(f"All models failed. Last error: {last_error}")
-
 
 @app.post("/ask/")
 async def ask_question(data: QuestionInput):
-    
     # --- GLOBAL MODE ---
     if data.mode == "global":
         prompt = f"""You are a highly intelligent and helpful AI assistant. 
@@ -105,7 +115,7 @@ async def ask_question(data: QuestionInput):
 
     # --- DOCUMENT (RAG) MODE ---
     else:
-        question_embedding = embedding_model.encode(data.question, convert_to_tensor=True)
+        question_embedding = get_embedding(data.question)
         all_files = list(files_collection.find())
 
         if not all_files:
@@ -113,8 +123,7 @@ async def ask_question(data: QuestionInput):
 
         scores = []
         for file in all_files:
-            content_embedding = embedding_model.encode(file["content"], convert_to_tensor=True)
-            score = util.pytorch_cos_sim(question_embedding, content_embedding).item()
+            score = cosine_similarity(question_embedding, file["embedding"])
             scores.append((file, score))
 
         scores.sort(key=lambda x: x[1], reverse=True)
@@ -132,7 +141,6 @@ async def ask_question(data: QuestionInput):
         
         final_answer = get_gemini_response(prompt)
 
-    # Save to MongoDB
     chats_collection.insert_one({
         "chat_id": data.chat_id,
         "question": data.question,
