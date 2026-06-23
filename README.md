@@ -55,4 +55,16 @@ If you wish to run this application locally, follow these steps:
    uvicorn main:app --reload
 
 The API will be available at http://127.0.0.1:8000.
- 
+
+Project Evolution
+
+AskYourDoc is the second stage in a progression of RAG systems. Understanding this arc explains the architectural decisions made at each stage.
+
+Stage 1 — IGT ChatBoT
+
+Built during a backend internship at IGT Solutions (June–July 2025). Developed iteratively: starting from a basic AI21 LLM chatbot → ChromaDB vector memory → MongoDB persistence → SentenceTransformer embeddings → production FastAPI REST API with /upload/, /ask/, and /continue-chat/ endpoints. No frontend. AI21 API keys are now expired.
+
+Stage 2 — AskYourDoc (This Project)
+
+Independent rebuild post-internship. Migrated from AI21 → Google Gemini (active API), built the first HTML/CSS/JS frontend, and achieved live cloud deployment (Vercel + Render). Same core RAG architecture, meaningfully improved stack.
+
